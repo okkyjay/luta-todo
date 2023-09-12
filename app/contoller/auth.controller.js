@@ -1,6 +1,8 @@
 const bycrptJs = require('bcryptjs')
 const userModel = require('../model/user.model')
 const jwt = require('jsonwebtoken')
+const configEnv = require('../config/index.config')
+const Joi = require('joi')
 
 exports.Login = async (req, res) => {
     try {
@@ -28,8 +30,8 @@ exports.Login = async (req, res) => {
                 })
             }
             if(passwordIsValid){
-                const token = jwt.sign({id: user.id}, '123456', {
-                    expiresIn: '30m'
+                const token = jwt.sign({id: user.id}, configEnv.token_secret, {
+                    expiresIn: configEnv.token_lifetime
                 })
                 return res.send({
                     status: true,
@@ -55,26 +57,39 @@ exports.Login = async (req, res) => {
 
 exports.Register = async (req, res) => {
     try {
+        const signValidatin = Joi.object({
+            name: Joi.string().required(),
+            email: Joi.string().required().email(),
+            password: Joi.string().required().min(8).max(100)
+        })
+        const {error, value} = signValidatin.validate(req.body)
+        if(error){
+            return res.send({
+                status: false,
+                message: 'Some fileds provided are not valid',
+                err: error.details
+            })
+        }
         const {name, email, password} = req.body
-        if(!name){
-            return res.send({
-                status: false,
-                message:"Name field is required"
-            })
-        }
-        if(!email){
-            return res.send({
-                status: false,
-                message:"Email field is required"
-            })
-        }
+        // if(!name){
+        //     return res.send({
+        //         status: false,
+        //         message:"Name field is required"
+        //     })
+        // }
+        // if(!email){
+        //     return res.send({
+        //         status: false,
+        //         message:"Email field is required"
+        //     })
+        // }
         
-        if(!password){
-            return res.send({
-                status: false,
-                message:"Password field is required"
-            })
-        }
+        // if(!password){
+        //     return res.send({
+        //         status: false,
+        //         message:"Password field is required"
+        //     })
+        // }
         const userExist = await userModel.findOne({email: email})
         if(userExist){
             return res.send({

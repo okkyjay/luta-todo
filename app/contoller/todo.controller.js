@@ -22,7 +22,11 @@ exports.postTodo = async (req, res) => {
             userId: userId
         })
         await newTask.save()
-        res.send({newTask})
+        res.send({
+            status: true,
+            message: "Sucessful",
+            data: newTask
+        })
     } catch (error) {
         console.log(error)
     }

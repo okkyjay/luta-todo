@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken')
+const configEnv = require('../config/index.config')
 
 checkLoginToken = (req, res, next) => {
     const auth = req.headers.authorization
@@ -15,7 +16,7 @@ checkLoginToken = (req, res, next) => {
 
     const token = split[1]
 
-    jwt.verify(token, '123456', (err, decoded) => {
+    jwt.verify(token, configEnv.token_secret, (err, decoded) => {
         if(err){
             return res.send({
                 status: false,
